@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { ArrowUpRight, Filter, Search } from "lucide-react";
 import { PageHeader } from "../shared/PageHeader";
 
@@ -10,5 +11,6 @@ const cases = [
 ];
 
 export function CasesPage() {
-  return <><PageHeader eyebrow="Investigation workspace" title="Investigation queue" description="Triage anomalies, assign owners, and follow the highest-risk signals." action="+ New investigation" /><section className="feature-panel"><div className="toolbar"><div className="search-field"><Search size={15} /><input placeholder="Search cases" /></div><button className="secondary-action"><Filter size={14} /> Filters</button></div><div className="table-wrap"><table><thead><tr><th>Case</th><th>Investigation</th><th>Vendor</th><th>Risk</th><th>Status</th><th>Updated</th><th /></tr></thead><tbody>{cases.map(([id, title, vendor, risk, status, time]) => <tr key={id}><td className="mono">{id}</td><td><strong>{title}</strong></td><td>{vendor}</td><td><span className={`table-risk ${Number(risk) >= 75 ? "high" : Number(risk) >= 50 ? "medium" : "low"}`}>{risk}</span></td><td><span className={`status status-${status.toLowerCase()}`}>{status}</span></td><td>{time}</td><td><ArrowUpRight size={15} /></td></tr>)}</tbody></table></div></section></>;
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  return <><PageHeader eyebrow="Investigation workspace" title="Investigation queue" description="Triage anomalies, assign owners, and follow the highest-risk signals." action="+ New investigation" /><section className="feature-panel"><div className="toolbar"><div className="search-field"><Search size={15} /><input aria-label="Search cases" placeholder="Search cases" /></div><button className="secondary-action" onClick={() => setFiltersOpen((open) => !open)}><Filter size={14} /> {filtersOpen ? "Hide filters" : "Filters"}</button></div>{filtersOpen && <div className="filter-note">Showing all statuses · Highest risk first</div>}<div className="table-wrap"><table><thead><tr><th>Case</th><th>Investigation</th><th>Vendor</th><th>Risk</th><th>Status</th><th>Updated</th><th /></tr></thead><tbody>{cases.map(([id, title, vendor, risk, status, time]) => <tr key={id}><td className="mono">{id}</td><td><strong>{title}</strong></td><td>{vendor}</td><td><span className={`table-risk ${Number(risk) >= 75 ? "high" : Number(risk) >= 50 ? "medium" : "low"}`}>{risk}</span></td><td><span className={`status status-${status.toLowerCase()}`}>{status}</span></td><td>{time}</td><td><ArrowUpRight size={15} /></td></tr>)}</tbody></table></div></section></>;
 }
