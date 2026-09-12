@@ -32,15 +32,8 @@ import { CasesPage } from "./features/cases/CasesPage";
 import { VendorsPage } from "./features/vendors/VendorsPage";
 import { ReportsPage } from "./features/reports/ReportsPage";
 import { ChatPage } from "./features/chat/ChatPage";
-
-type DashboardData = {
-  period: string;
-  kpis: { label: string; value: string; change: string; trend: "up" | "down"; tone: string; icon: string }[];
-  exposure_series: { month: string; exposure: number; investigations: number }[];
-  vendor_heatmap: { name: string; category: string; score: number; exposure: string }[];
-  cases: { id: string; title: string; vendor: string; risk: number; status: string; time: string }[];
-  cfo_summary: { headline: string; body: string; actions: number; confidence: number };
-};
+import { getDashboard } from "./services/api";
+import type { DashboardResponse } from "./services/types";
 
 const iconMap = { case: BriefcaseBusiness, exposure: TrendingUp, vendor: ShieldAlert, recovered: FileCheck2 };
 
@@ -49,19 +42,34 @@ export function App() {
 }
 
 function AppShell() {
-  const [data, setData] = useState<DashboardData | null>(null);
+  const [data, setData] = useState<DashboardResponse | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/v1/dashboard")
-      .then((response) => {
-        if (!response.ok) throw new Error("Dashboard unavailable");
-        return response.json() as Promise<DashboardData>;
+    let mounted = true;
+
+    getDashboard()
+      .then((dashboard) => {
+        if (mounted) {
+          setData(dashboard);
+          setError(null);
+        }
       })
-      .then(setData)
-      .catch(() => setData(null))
-      .finally(() => setLoading(false));
+      .catch((requestError: Error) => {
+        if (mounted) {
+          setData(null);
+          setError(requestError.message);
+        }
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const location = useLocation();
@@ -100,7 +108,7 @@ function AppShell() {
         <div className="content">
           <section className="page-heading"><div><p className="eyebrow">Monday, June 30, 2025</p><h1>Good morning, Jeevan <span>✦</span></h1><p className="subheading">Here’s what needs your attention today.</p></div><button className="period-selector">{data?.period ?? "Q2 2025"} <ChevronDown size={15} /></button></section>
           <Routes>
-            <Route path="/" element={loading ? <LoadingState /> : data ? <Dashboard data={data} /> : <ErrorState />} />
+            <Route path="/" element={loading ? <LoadingState /> : error ? <ErrorState message={error} /> : data && hasDashboardContent(data) ? <Dashboard data={data} /> : <EmptyState />} />
             <Route path="/cases" element={<CasesPage />} />
             <Route path="/vendors" element={<VendorsPage />} />
             <Route path="/reports" element={<ReportsPage />} />
@@ -116,7 +124,7 @@ function NavItem({ to, icon, label, count }: { to: string; icon: React.ReactNode
   return <NavLink end={to === "/"} className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`} to={to}><span>{icon}</span>{label}{count && <em>{count}</em>}</NavLink>;
 }
 
-function Dashboard({ data }: { data: DashboardData }) {
+function Dashboard({ data }: { data: DashboardResponse }) {
   return <div className="dashboard-grid">
     <section className="kpi-grid">{data.kpis.map((kpi) => { const Icon = iconMap[kpi.icon as keyof typeof iconMap]; return <article className={`kpi-card ${kpi.tone}`} key={kpi.label}><div className="kpi-top"><div className="kpi-icon"><Icon size={18} /></div><span className={`trend ${kpi.trend}`}>{kpi.trend === "up" ? <ArrowUpRight size={13} /> : <ArrowDownRight size={13} />}{kpi.change}</span></div><p>{kpi.label}</p><strong>{kpi.value}</strong><small>vs. previous quarter</small></article>; })}</section>
     <section className="panel exposure-panel"><PanelHeading title="Risk exposure" detail="Total exposure by month" action="View analytics" /><div className="chart-legend"><span><i className="legend-cyan" /> Exposure ($M)</span><span><i className="legend-line" /> Investigations</span></div><div className="chart"><ResponsiveContainer width="100%" height="100%"><AreaChart data={data.exposure_series} margin={{ top: 15, right: 12, left: -20, bottom: 0 }}><defs><linearGradient id="exposureFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#38d5d0" stopOpacity={0.26} /><stop offset="100%" stopColor="#38d5d0" stopOpacity={0} /></linearGradient></defs><CartesianGrid stroke="#27313d" vertical={false} /><XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: "#708093", fontSize: 11 }} /><YAxis axisLine={false} tickLine={false} tick={{ fill: "#708093", fontSize: 11 }} tickFormatter={(value) => `$${value}M`} /><Tooltip contentStyle={{ background: "#151d27", border: "1px solid #303d4b", borderRadius: 8, fontSize: 12 }} formatter={(value, name) => [name === "exposure" ? `$${value}M` : value, name === "exposure" ? "Exposure" : "Investigations"]} /><Area type="monotone" dataKey="exposure" stroke="#42d6d0" strokeWidth={2} fill="url(#exposureFill)" /><Area type="monotone" dataKey="investigations" stroke="#e5a954" strokeWidth={1.5} strokeDasharray="4 4" fill="none" /></AreaChart></ResponsiveContainer></div></section>
@@ -129,4 +137,8 @@ function Dashboard({ data }: { data: DashboardData }) {
 function PanelHeading({ title, detail, action }: { title: string; detail: string; action: string }) { return <div className="panel-heading"><div><h2>{title}</h2><p>{detail}</p></div><a href="#">{action} <ArrowUpRight size={14} /></a></div>; }
 function riskTone(score: number) { return score >= 75 ? "high" : score >= 50 ? "medium" : "low"; }
 function LoadingState() { return <div className="loading-state"><div className="loader" />Loading command center…</div>; }
-function ErrorState() { return <div className="error-state"><ShieldAlert size={24} /><h2>Dashboard unavailable</h2><p>Start the FastAPI service and refresh this page.</p></div>; }
+function EmptyState() { return <div className="error-state"><BriefcaseBusiness size={24} /><h2>No dashboard data yet</h2><p>There are no financial signals available for this workspace.</p></div>; }
+function ErrorState({ message }: { message: string }) { return <div className="error-state"><ShieldAlert size={24} /><h2>Dashboard unavailable</h2><p>{message} Refresh the page after the API is available.</p></div>; }
+function hasDashboardContent(data: DashboardResponse) {
+  return data.kpis.length > 0 || data.exposure_series.length > 0 || data.vendor_heatmap.length > 0 || data.cases.length > 0;
+}
