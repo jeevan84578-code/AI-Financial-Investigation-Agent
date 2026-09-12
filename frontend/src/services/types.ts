@@ -49,3 +49,27 @@ export interface DashboardResponse {
   cfo_summary: CfoSummary;
 }
 
+export interface InvestigationFinding {
+  type: "duplicate_invoice" | "unusual_amount" | "rapid_payment" | "concentration";
+  title: string;
+  detail: string;
+  vendor: string;
+  severity: "high" | "medium" | "low";
+}
+
+export interface InvestigationTimelineEvent {
+  step: string;
+  detail: string;
+  status: "complete" | "in_progress";
+}
+
+export interface InvestigationResponse {
+  filename: string;
+  transaction_count: number;
+  vendor_count: number;
+  total_amount: number;
+  risk_score: number;
+  findings: InvestigationFinding[];
+  executive_summary: string;
+  timeline: InvestigationTimelineEvent[];
+}

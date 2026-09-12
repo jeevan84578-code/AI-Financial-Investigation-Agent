@@ -1,4 +1,4 @@
-import type { DashboardResponse } from "./types";
+import type { DashboardResponse, InvestigationResponse } from "./types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
 const REQUEST_TIMEOUT_MS = 10_000;
@@ -51,3 +51,11 @@ export function getDashboard(): Promise<DashboardResponse> {
   return request<DashboardResponse>("/api/v1/dashboard");
 }
 
+export function runInvestigation(file: File): Promise<InvestigationResponse> {
+  const formData = new FormData();
+  formData.append("file", file);
+  return request<InvestigationResponse>("/api/v1/investigations/run", {
+    method: "POST",
+    body: formData,
+  });
+}
