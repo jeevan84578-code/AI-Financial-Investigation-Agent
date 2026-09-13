@@ -1,4 +1,4 @@
-import type { AnalyticsCharts, AnalyticsOverview, DashboardResponse, InvestigationListItem, InvestigationResponse } from "./types";
+import type { AnalyticsCharts, AnalyticsOverview, ApprovalResponse, CaseListItem, CaseResponse, CaseStatus, CasePriority, DashboardResponse, InvestigationListItem, InvestigationResponse } from "./types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
 const REQUEST_TIMEOUT_MS = 10_000;
@@ -72,6 +72,76 @@ export function generateInvestigationReport(id: string): Promise<InvestigationRe
   return request<InvestigationResponse>(`/api/v1/investigations/${encodeURIComponent(id)}/generate-report`, {
     method: "POST",
   });
+}
+
+export function getCases(): Promise<CaseListItem[]> {
+  return request<CaseListItem[]>("/api/v1/cases");
+}
+
+export function getCase(id: string): Promise<CaseResponse> {
+  return request<CaseResponse>(`/api/v1/cases/${encodeURIComponent(id)}`);
+}
+
+export function updateCaseStatus(id: string, status: CaseStatus): Promise<CaseListItem> {
+  return request<CaseListItem>(`/api/v1/cases/${encodeURIComponent(id)}/status`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status }),
+  });
+}
+
+export function updateCasePriority(id: string, priority: CasePriority): Promise<CaseListItem> {
+  return request<CaseListItem>(`/api/v1/cases/${encodeURIComponent(id)}/priority`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ priority }),
+  });
+}
+
+export function assignCase(id: string, assignedTo: string): Promise<CaseListItem> {
+  return request<CaseListItem>(`/api/v1/cases/${encodeURIComponent(id)}/assign`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ assigned_to: assignedTo }),
+  });
+}
+
+export function addCaseNote(id: string, note: string): Promise<CaseResponse> {
+  return request<CaseResponse>(`/api/v1/cases/${encodeURIComponent(id)}/notes`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ note }),
+  });
+}
+
+export function getCaseApproval(id: string): Promise<ApprovalResponse> {
+  return request<ApprovalResponse>(`/api/v1/cases/${encodeURIComponent(id)}/approval`);
+}
+
+export function approveCase(id: string, approver: string, notes: string): Promise<ApprovalResponse> {
+  return request<ApprovalResponse>(`/api/v1/cases/${encodeURIComponent(id)}/approve`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ approver, notes }),
+  });
+}
+
+export function rejectCase(id: string, approver: string, notes: string): Promise<ApprovalResponse> {
+  return request<ApprovalResponse>(`/api/v1/cases/${encodeURIComponent(id)}/reject`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ approver, notes }),
+  });
+}
+
+export async function exportCase(id: string, format: "pdf" | "excel"): Promise<Blob> {
+  const response = await fetch(`${API_BASE_URL}/api/v1/cases/${encodeURIComponent(id)}/export/${format}`, {
+    headers: { Accept: format === "pdf" ? "application/pdf" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" },
+  });
+  if (!response.ok) {
+    throw new ApiError(`Export failed with status ${response.status}`, response.status);
+  }
+  return response.blob();
 }
 
 export function getAnalyticsOverview(): Promise<AnalyticsOverview> {

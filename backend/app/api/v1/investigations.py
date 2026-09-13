@@ -81,6 +81,7 @@ async def run_investigation(file: UploadFile = File(...), db: Session = Depends(
         findings_json=result["findings"],
         timeline_json=result["timeline"],
         created_at=datetime.now(timezone.utc),
+        last_updated=datetime.now(timezone.utc),
     )
     db.add(investigation)
     db.commit()

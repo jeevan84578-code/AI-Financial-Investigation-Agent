@@ -28,7 +28,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { CasesPage } from "./features/cases/CasesPage";
+import { CaseManagementPage } from "./features/cases/CaseManagementPage";
 import { VendorsPage } from "./features/vendors/VendorsPage";
 import { ReportsPage } from "./features/reports/ReportsPage";
 import { ChatPage } from "./features/chat/ChatPage";
@@ -115,7 +115,7 @@ function AppShell() {
           {location.pathname === "/" && <section className="page-heading"><div><p className="eyebrow">Monday, June 30, 2025</p><h1>Good morning, Jeevan <span>✦</span></h1><p className="subheading">Here’s what needs your attention today.</p></div><Link className="period-selector" to="/settings">{data?.period ?? "Q2 2025"} <ChevronDown size={15} /></Link></section>}
           <Routes>
             <Route path="/" element={loading ? <LoadingState /> : error ? <ErrorState message={error} /> : data && hasDashboardContent(data) ? <Dashboard data={data} /> : <EmptyState />} />
-            <Route path="/cases" element={<CasesPage />} />
+            <Route path="/cases" element={<CaseManagementPage />} />
             <Route path="/investigations" element={<InvestigationHistoryPage />} />
             <Route path="/investigations/new" element={<InvestigationPage />} />
             <Route path="/investigations/:id" element={<InvestigationDetailsPage />} />

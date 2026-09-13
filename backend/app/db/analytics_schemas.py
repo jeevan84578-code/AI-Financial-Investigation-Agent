@@ -8,6 +8,9 @@ class AnalyticsOverview(BaseModel):
     average_risk_score: float
     high_risk_count: int
     vendor_count: int
+    pending_approvals: int
+    approved_cases: int
+    rejected_cases: int
 
 
 class RiskTrendPoint(BaseModel):

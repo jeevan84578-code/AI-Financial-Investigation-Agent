@@ -45,6 +45,9 @@ def get_overview(db: Session = Depends(get_db)) -> AnalyticsOverview:
         average_risk_score=round(sum(scores) / len(scores), 1) if scores else 0,
         high_risk_count=sum(score >= 70 for score in scores),
         vendor_count=len(vendors),
+        pending_approvals=sum(record.approval_status in {"Pending", "Under Review"} for record in records),
+        approved_cases=sum(record.approval_status == "Approved" for record in records),
+        rejected_cases=sum(record.approval_status == "Rejected" for record in records),
     )
 
 

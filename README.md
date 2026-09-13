@@ -6,10 +6,10 @@ Helios FI is an AI-powered financial investigation workspace for finance, audit,
 
 This repository currently contains the command dashboard foundation:
 
-- `backend/` — FastAPI service with `GET /health` and `GET /api/v1/dashboard`.
+- `backend/` — FastAPI service with dashboard, investigation, analytics, and case-management APIs.
 - `frontend/` — Vite + React + TypeScript dashboard shell.
 
-The dashboard uses seeded data until PostgreSQL and the investigation services are introduced.
+Investigations and case-management updates are persisted through SQLAlchemy.
 
 ## Run locally
 
@@ -54,3 +54,16 @@ Investigation history is available at `/investigations`, with persisted detail p
 `/investigations/{id}`. New CSV analyses start at `/investigations/new`.
 On an investigation detail page, `Generate AI report` calls OpenRouter and persists the
 Qwen-generated report sections to the investigation record.
+Case management is available at `/cases`. It supports status, priority, assignment,
+filters, notes, and a detail drawer. The corresponding APIs are:
+`GET /api/v1/cases`, `GET /api/v1/cases/{id}`, `PATCH /api/v1/cases/{id}/status`,
+`PATCH /api/v1/cases/{id}/priority`, `PATCH /api/v1/cases/{id}/assign`, and
+`POST /api/v1/cases/{id}/notes`.
+Finance approval is available from the case detail drawer. Approval state and audit
+history are persisted by migration `0004_add_approval_workflow_fields`. The approval
+APIs are `GET /api/v1/cases/{id}/approval`, `POST /api/v1/cases/{id}/approve`, and
+`POST /api/v1/cases/{id}/reject`. Analytics also reports pending, approved, and
+rejected case totals.
+Case details can be downloaded as PDF or Excel from the drawer through
+`GET /api/v1/cases/{id}/export/pdf` and
+`GET /api/v1/cases/{id}/export/excel`.

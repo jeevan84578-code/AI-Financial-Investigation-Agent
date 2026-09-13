@@ -24,6 +24,16 @@ class Investigation(Base):
     recommendations: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
     confidence_score: Mapped[float] = mapped_column(Float, nullable=True)
     report_generated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
+    status: Mapped[str] = mapped_column(String(30), nullable=False, default="Open")
+    priority: Mapped[str] = mapped_column(String(20), nullable=False, default="Medium")
+    assigned_to: Mapped[str] = mapped_column(String(120), nullable=True)
+    notes: Mapped[list[dict]] = mapped_column(JSON, nullable=False, default=list)
+    last_updated: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
+    approval_status: Mapped[str] = mapped_column(String(20), nullable=False, default="Pending")
+    approved_by: Mapped[str] = mapped_column(String(120), nullable=True)
+    approved_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
+    approval_notes: Mapped[str] = mapped_column(Text, nullable=True)
+    approval_history: Mapped[list[dict]] = mapped_column(JSON, nullable=False, default=list)
 
     @property
     def findings(self) -> list[dict]:

@@ -80,6 +80,55 @@ export interface InvestigationResponse {
   report_generated_at: string | null;
 }
 
+export type CaseStatus = "Open" | "Under Review" | "Escalated" | "Closed";
+export type CasePriority = "Low" | "Medium" | "High" | "Critical";
+export type ApprovalStatus = "Pending" | "Under Review" | "Approved" | "Rejected";
+
+export interface ApprovalHistoryEntry {
+  status: ApprovalStatus;
+  approver: string;
+  notes: string;
+  created_at: string;
+}
+
+export interface ApprovalResponse {
+  status: ApprovalStatus;
+  approved_by: string | null;
+  approved_at: string | null;
+  notes: string | null;
+  history: ApprovalHistoryEntry[];
+}
+
+export interface CaseListItem {
+  id: string;
+  filename: string;
+  risk_score: number;
+  status: CaseStatus;
+  priority: CasePriority;
+  assigned_to: string | null;
+  last_updated: string;
+  approval_status: ApprovalStatus;
+}
+
+export interface CaseNote {
+  text: string;
+  author: string;
+  created_at: string;
+}
+
+export interface CaseResponse extends InvestigationResponse {
+  status: CaseStatus;
+  priority: CasePriority;
+  assigned_to: string | null;
+  notes: CaseNote[];
+  last_updated: string;
+  approval_status: ApprovalStatus;
+  approved_by: string | null;
+  approved_at: string | null;
+  approval_notes: string | null;
+  approval_history: ApprovalHistoryEntry[];
+}
+
 export interface AiReport {
   executive_narrative: string;
   risk_assessment: string;
@@ -99,6 +148,9 @@ export interface AnalyticsOverview {
   average_risk_score: number;
   high_risk_count: number;
   vendor_count: number;
+  pending_approvals: number;
+  approved_cases: number;
+  rejected_cases: number;
 }
 
 export interface RiskTrendPoint {
