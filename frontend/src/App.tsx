@@ -36,6 +36,7 @@ import { PlaceholderPage } from "./features/shared/PlaceholderPage";
 import { InvestigationPage } from "./features/investigations/InvestigationPage";
 import { InvestigationHistoryPage } from "./features/investigations/InvestigationHistoryPage";
 import { InvestigationDetailsPage } from "./features/investigations/InvestigationDetailsPage";
+import { AnalyticsPage } from "./features/analytics/AnalyticsPage";
 import { getDashboard } from "./services/api";
 import type { DashboardResponse } from "./services/types";
 
@@ -77,7 +78,7 @@ function AppShell() {
   }, []);
 
   const location = useLocation();
-  const pageNames: Record<string, string> = { "/": "Command center", "/cases": "Investigations", "/investigations": "Investigation history", "/investigations/new": "Run investigation", "/vendors": "Vendors", "/reports": "Reports", "/chat": "AI investigator", "/settings": "Settings", "/help": "Help center", "/notifications": "Notifications", "/account": "Account", "/search": "Search" };
+  const pageNames: Record<string, string> = { "/": "Command center", "/cases": "Investigations", "/investigations": "Investigation history", "/investigations/new": "Run investigation", "/analytics": "Risk analytics", "/vendors": "Vendors", "/reports": "Reports", "/chat": "AI investigator", "/settings": "Settings", "/help": "Help center", "/notifications": "Notifications", "/account": "Account", "/search": "Search" };
 
   return (
     <div className="app-shell">
@@ -92,6 +93,7 @@ function AppShell() {
           <p className="nav-label">Workspace</p>
           <NavItem to="/" icon={<LayoutDashboard size={17} />} label="Command center" />
           <NavItem to="/investigations" icon={<BriefcaseBusiness size={17} />} label="Investigations" count="24" />
+          <NavItem to="/analytics" icon={<TrendingUp size={17} />} label="Risk analytics" />
           <NavItem to="/vendors" icon={<Users size={17} />} label="Vendors" />
           <NavItem to="/chat" icon={<MessageSquare size={17} />} label="AI investigator" />
           <NavItem to="/reports" icon={<FileCheck2 size={17} />} label="Reports" />
@@ -110,13 +112,14 @@ function AppShell() {
         </header>
 
         <div className="content">
-          <section className="page-heading"><div><p className="eyebrow">Monday, June 30, 2025</p><h1>Good morning, Jeevan <span>✦</span></h1><p className="subheading">Here’s what needs your attention today.</p></div><Link className="period-selector" to="/settings">{data?.period ?? "Q2 2025"} <ChevronDown size={15} /></Link></section>
+          {location.pathname === "/" && <section className="page-heading"><div><p className="eyebrow">Monday, June 30, 2025</p><h1>Good morning, Jeevan <span>✦</span></h1><p className="subheading">Here’s what needs your attention today.</p></div><Link className="period-selector" to="/settings">{data?.period ?? "Q2 2025"} <ChevronDown size={15} /></Link></section>}
           <Routes>
             <Route path="/" element={loading ? <LoadingState /> : error ? <ErrorState message={error} /> : data && hasDashboardContent(data) ? <Dashboard data={data} /> : <EmptyState />} />
             <Route path="/cases" element={<CasesPage />} />
             <Route path="/investigations" element={<InvestigationHistoryPage />} />
             <Route path="/investigations/new" element={<InvestigationPage />} />
             <Route path="/investigations/:id" element={<InvestigationDetailsPage />} />
+            <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/vendors" element={<VendorsPage />} />
             <Route path="/reports" element={<ReportsPage />} />
             <Route path="/chat" element={<ChatPage />} />

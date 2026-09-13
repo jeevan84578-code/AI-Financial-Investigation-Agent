@@ -1,4 +1,4 @@
-import type { DashboardResponse, InvestigationListItem, InvestigationResponse } from "./types";
+import type { AnalyticsCharts, AnalyticsOverview, DashboardResponse, InvestigationListItem, InvestigationResponse } from "./types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
 const REQUEST_TIMEOUT_MS = 10_000;
@@ -66,4 +66,12 @@ export function getInvestigations(): Promise<InvestigationListItem[]> {
 
 export function getInvestigation(id: string): Promise<InvestigationResponse> {
   return request<InvestigationResponse>(`/api/v1/investigations/${encodeURIComponent(id)}`);
+}
+
+export function getAnalyticsOverview(): Promise<AnalyticsOverview> {
+  return request<AnalyticsOverview>("/api/v1/analytics/overview");
+}
+
+export function getAnalyticsCharts(): Promise<AnalyticsCharts> {
+  return request<AnalyticsCharts>("/api/v1/analytics/charts");
 }

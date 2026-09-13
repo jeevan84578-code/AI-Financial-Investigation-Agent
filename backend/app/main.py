@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 
 from app.api.v1.dashboard import router as dashboard_router
 from app.api.v1.investigations import router as investigations_router
+from app.api.v1.analytics import router as analytics_router
 from app.db.database import init_db
 
 
@@ -25,6 +26,7 @@ app.add_middleware(
 
 app.include_router(dashboard_router, prefix="/api/v1")
 app.include_router(investigations_router, prefix="/api/v1")
+app.include_router(analytics_router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["system"])

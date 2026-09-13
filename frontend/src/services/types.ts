@@ -82,3 +82,41 @@ export interface InvestigationListItem {
   risk_score: number;
   created_at: string;
 }
+
+export interface AnalyticsOverview {
+  total_investigations: number;
+  average_risk_score: number;
+  high_risk_count: number;
+  vendor_count: number;
+}
+
+export interface RiskTrendPoint {
+  date: string;
+  investigations: number;
+  average_risk: number;
+}
+
+export interface VendorConcentrationPoint {
+  vendor: string;
+  spend: number;
+}
+
+export interface FindingCategoryPoint {
+  category: string;
+  count: number;
+}
+
+export interface RecentInvestigation {
+  id: string;
+  filename: string;
+  risk_score: number;
+  created_at: string;
+  status: string;
+}
+
+export interface AnalyticsCharts {
+  trend: RiskTrendPoint[];
+  vendor_concentration: VendorConcentrationPoint[];
+  finding_categories: FindingCategoryPoint[];
+  recent_investigations: RecentInvestigation[];
+}
