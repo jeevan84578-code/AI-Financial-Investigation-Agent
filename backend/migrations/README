@@ -1,0 +1,1 @@
+Alembic migrations belong in this directory. Run `alembic revision --autogenerate` after configuring DATABASE_URL.

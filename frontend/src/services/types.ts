@@ -64,7 +64,9 @@ export interface InvestigationTimelineEvent {
 }
 
 export interface InvestigationResponse {
+  id: string;
   filename: string;
+  created_at: string;
   transaction_count: number;
   vendor_count: number;
   total_amount: number;
@@ -72,4 +74,11 @@ export interface InvestigationResponse {
   findings: InvestigationFinding[];
   executive_summary: string;
   timeline: InvestigationTimelineEvent[];
+}
+
+export interface InvestigationListItem {
+  id: string;
+  filename: string;
+  risk_score: number;
+  created_at: string;
 }

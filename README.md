@@ -23,6 +23,21 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
+Set `DATABASE_URL` for PostgreSQL, for example:
+
+```env
+DATABASE_URL=postgresql+psycopg://helios:password@localhost:5432/helios_fi
+```
+
+If `DATABASE_URL` is omitted, local development uses `backend/helios-fi.db` (SQLite).
+The investigation table is initialized on startup. For migration workflows:
+
+```bash
+cd backend
+alembic revision --autogenerate -m "describe change"
+alembic upgrade head
+```
+
 ### Frontend
 
 ```bash
@@ -33,3 +48,5 @@ npm run dev
 
 The Vite development server proxies `/api` requests to `http://localhost:8000`.
 
+Investigation history is available at `/investigations`, with persisted detail pages at
+`/investigations/{id}`. New CSV analyses start at `/investigations/new`.

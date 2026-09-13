@@ -2,9 +2,15 @@ import csv
 import io
 import re
 from collections import Counter, defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from app.db.database import get_db
+from app.db.models import Investigation
+from app.db.schemas import InvestigationListItem, InvestigationResponse
 
 router = APIRouter(prefix="/investigations", tags=["investigations"])
 
@@ -24,8 +30,8 @@ COLUMN_ALIASES = {
 }
 
 
-@router.post("/run")
-async def run_investigation(file: UploadFile = File(...)) -> dict:
+@router.post("/run", response_model=InvestigationResponse)
+async def run_investigation(file: UploadFile = File(...), db: Session = Depends(get_db)) -> Investigation:
     if not file.filename or not file.filename.lower().endswith(".csv"):
         raise HTTPException(status_code=400, detail="Please upload a CSV file.")
 
@@ -49,7 +55,7 @@ async def run_investigation(file: UploadFile = File(...)) -> dict:
     exposure = sum(row["amount"] for row in rows)
     high_risk_vendors = len({finding["vendor"] for finding in findings if finding["type"] == "concentration"})
 
-    return {
+    result = {
         "filename": file.filename,
         "transaction_count": len(rows),
         "vendor_count": vendors,
@@ -64,6 +70,34 @@ async def run_investigation(file: UploadFile = File(...)) -> dict:
             {"step": "Investigation ready", "detail": "Review findings and assign follow-up actions", "status": "complete"},
         ],
     }
+    investigation = Investigation(
+        filename=result["filename"],
+        risk_score=result["risk_score"],
+        transaction_count=result["transaction_count"],
+        vendor_count=result["vendor_count"],
+        total_amount=result["total_amount"],
+        executive_summary=result["executive_summary"],
+        findings_json=result["findings"],
+        timeline_json=result["timeline"],
+        created_at=datetime.now(timezone.utc),
+    )
+    db.add(investigation)
+    db.commit()
+    db.refresh(investigation)
+    return investigation
+
+
+@router.get("", response_model=list[InvestigationListItem])
+def list_investigations(db: Session = Depends(get_db)) -> list[Investigation]:
+    return list(db.scalars(select(Investigation).order_by(Investigation.created_at.desc())).all())
+
+
+@router.get("/{investigation_id}", response_model=InvestigationResponse)
+def get_investigation(investigation_id: str, db: Session = Depends(get_db)) -> Investigation:
+    investigation = db.get(Investigation, investigation_id)
+    if investigation is None:
+        raise HTTPException(status_code=404, detail="Investigation not found.")
+    return investigation
 
 
 def _parse_csv(raw: bytes) -> list[dict]:

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ChangeEvent, DragEvent } from "react";
-import { AlertTriangle, CheckCircle2, Clock3, FileUp, ShieldCheck, UploadCloud } from "lucide-react";
+import { AlertTriangle, CheckCircle2, FileUp, ShieldCheck, UploadCloud } from "lucide-react";
 import { PageHeader } from "../shared/PageHeader";
 import { runInvestigation } from "../../services/api";
 import type { InvestigationResponse } from "../../services/types";
