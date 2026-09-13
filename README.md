@@ -27,6 +27,8 @@ Set `DATABASE_URL` for PostgreSQL, for example:
 
 ```env
 DATABASE_URL=postgresql+psycopg://helios:password@localhost:5432/helios_fi
+OPENROUTER_API_KEY=your-openrouter-key
+OPENROUTER_MODEL=qwen/qwen-2.5-72b-instruct
 ```
 
 If `DATABASE_URL` is omitted, local development uses `backend/helios-fi.db` (SQLite).
@@ -50,3 +52,5 @@ The Vite development server proxies `/api` requests to `http://localhost:8000`.
 
 Investigation history is available at `/investigations`, with persisted detail pages at
 `/investigations/{id}`. New CSV analyses start at `/investigations/new`.
+On an investigation detail page, `Generate AI report` calls OpenRouter and persists the
+Qwen-generated report sections to the investigation record.

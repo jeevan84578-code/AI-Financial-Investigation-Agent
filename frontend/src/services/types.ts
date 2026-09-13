@@ -74,6 +74,17 @@ export interface InvestigationResponse {
   findings: InvestigationFinding[];
   executive_summary: string;
   timeline: InvestigationTimelineEvent[];
+  ai_report: AiReport | null;
+  recommendations: string[];
+  confidence_score: number | null;
+  report_generated_at: string | null;
+}
+
+export interface AiReport {
+  executive_narrative: string;
+  risk_assessment: string;
+  key_evidence: string[];
+  business_impact: string;
 }
 
 export interface InvestigationListItem {

@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import DateTime, JSON, String, Text
+from sqlalchemy import DateTime, Float, JSON, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.database import Base
@@ -20,6 +20,10 @@ class Investigation(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
     findings_json: Mapped[list[dict]] = mapped_column(JSON, nullable=False, default=list)
     timeline_json: Mapped[list[dict]] = mapped_column(JSON, nullable=False, default=list)
+    ai_report: Mapped[dict] = mapped_column(JSON, nullable=True)
+    recommendations: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+    confidence_score: Mapped[float] = mapped_column(Float, nullable=True)
+    report_generated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
 
     @property
     def findings(self) -> list[dict]:
@@ -28,3 +32,7 @@ class Investigation(Base):
     @property
     def timeline(self) -> list[dict]:
         return self.timeline_json
+
+    @property
+    def report(self) -> dict | None:
+        return self.ai_report

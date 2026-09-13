@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 FindingSeverity = Literal["high", "medium", "low"]
@@ -38,6 +38,10 @@ class InvestigationResponse(InvestigationListItem):
     executive_summary: str
     findings: list[InvestigationFindingResponse]
     timeline: list[InvestigationTimelineResponse]
+    ai_report: dict | None = None
+    recommendations: list[str] = Field(default_factory=list)
+    confidence_score: float | None = None
+    report_generated_at: datetime | None = None
 
 
 class InvestigationCreate(BaseModel):

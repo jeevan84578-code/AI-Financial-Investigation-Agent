@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.db.models import Investigation
 from app.db.schemas import InvestigationListItem, InvestigationResponse
+from app.services.ai_report_service import AiReportError, generate_report
 
 router = APIRouter(prefix="/investigations", tags=["investigations"])
 
@@ -97,6 +98,32 @@ def get_investigation(investigation_id: str, db: Session = Depends(get_db)) -> I
     investigation = db.get(Investigation, investigation_id)
     if investigation is None:
         raise HTTPException(status_code=404, detail="Investigation not found.")
+    return investigation
+
+
+@router.post("/{investigation_id}/generate-report", response_model=InvestigationResponse)
+async def generate_investigation_report(
+    investigation_id: str, db: Session = Depends(get_db)
+) -> Investigation:
+    investigation = db.get(Investigation, investigation_id)
+    if investigation is None:
+        raise HTTPException(status_code=404, detail="Investigation not found.")
+    try:
+        report = await generate_report(investigation)
+    except AiReportError as error:
+        raise HTTPException(status_code=502, detail=str(error)) from error
+
+    investigation.ai_report = {
+        "executive_narrative": report.executive_narrative,
+        "risk_assessment": report.risk_assessment,
+        "key_evidence": report.key_evidence,
+        "business_impact": report.business_impact,
+    }
+    investigation.recommendations = report.recommendations
+    investigation.confidence_score = report.confidence_score
+    investigation.report_generated_at = datetime.now(timezone.utc)
+    db.commit()
+    db.refresh(investigation)
     return investigation
 
 

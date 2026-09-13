@@ -68,6 +68,12 @@ export function getInvestigation(id: string): Promise<InvestigationResponse> {
   return request<InvestigationResponse>(`/api/v1/investigations/${encodeURIComponent(id)}`);
 }
 
+export function generateInvestigationReport(id: string): Promise<InvestigationResponse> {
+  return request<InvestigationResponse>(`/api/v1/investigations/${encodeURIComponent(id)}/generate-report`, {
+    method: "POST",
+  });
+}
+
 export function getAnalyticsOverview(): Promise<AnalyticsOverview> {
   return request<AnalyticsOverview>("/api/v1/analytics/overview");
 }
